@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💕 Be My Valentine?</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating hearts background effect -->
+    <div class="floating-hearts-container" id="floatingHearts"></div>
+    
+    <!-- Cursor follower hearts -->
+    <div class="cursor-hearts" id="cursorHearts"></div>
+
+    <!-- Mute toggle button (hidden initially, shown after first YES click) -->
+    <button class="mute-toggle" id="muteToggle" style="display: none;">
+        <span class="mute-icon">🔊</span>
+    </button>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="heroSection">
+        <div class="hero-content">
+            <h1 class="main-heading">Felisa 💕</h1>
+            <p class="question">So… will you be my Valentine?</p>
+            
+            <div class="button-container" id="buttonContainer">
+                <button class="btn btn-yes" id="yesBtn">
+                    <span>💗 yes obviously</span>
+                </button>
+                <button class="btn btn-no" id="noBtn">
+                    <span>💔 no</span>
+                </button>
+            </div>
+
+            <!-- Response message (hidden initially) -->
+            <div class="response-message" id="responseMessage"></div>
+        </div>
+
+        <!-- Heart confetti (hidden initially) -->
+        <div class="confetti-container" id="confettiContainer"></div>
+    </section>
+
+    <!-- IMAGE SECTION -->
+    <section class="image-section" id="imageSection">
+        <h2 class="section-heading">main character origin story</h2>
+        
+        <div class="image-wrapper">
+            <img src="childhood.jpg" alt="Childhood graduation photo" class="childhood-image" id="childhoodImage">
+            <div class="image-glow"></div>
+        </div>
+        
+        <p class="image-caption">from little graduate to someone who found you</p>
+    </section>
+
+    <!-- FINAL SECTION -->
+    <section class="final-section">
+        <div class="final-text" id="finalText">
+            <span class="letter">f</span>
+            <span class="letter">a</span>
+            <span class="letter">a</span>
+            <span class="letter">a</span>
+            <span class="letter">h</span>
+            <span class="letter">h</span>
+            <span class="letter">h</span>
+        </div>
+    </section>
+
+    <!-- Image modal (for full-screen view) -->
+    <div class="modal" id="imageModal">
+        <span class="modal-close" id="modalClose">&times;</span>
+        <img class="modal-content" id="modalImage" src="childhood.jpg" alt="Childhood graduation photo">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
