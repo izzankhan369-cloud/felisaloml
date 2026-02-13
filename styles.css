@@ -1,281 +1,583 @@
-// ============================================
-// AUDIO CONTEXT & SOUND MANAGEMENT
-// ============================================
+/* ============================================
+   RESET & BASE
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-let audioContext = null;
-let isMuted = false;
-let audioInitialized = false;
-let noClickCount = 0;
+html {
+    scroll-behavior: smooth;
+}
 
-// Initialize audio context on first user interaction
-function initAudio() {
-    if (!audioInitialized) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        audioInitialized = true;
-        console.log('Audio initialized');
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Emoji', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    background: linear-gradient(135deg, #ff2d95 0%, #ff003c 50%, #ff2d95 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease-in-out infinite;
+}
+
+/* Animated gradient background */
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
     }
 }
 
-// Soft glossy click sound
-function playClickSound() {
-    if (!audioContext || isMuted) return;
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.08);
-    
-    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
-    
-    oscillator.type = 'sine';
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.12);
+/* Soft blur overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.15) 100%);
+    backdrop-filter: blur(1px);
+    pointer-events: none;
+    z-index: 1;
 }
 
-// Light sparkle chime for YES hover
-function playSparkleChime() {
-    if (!audioContext || isMuted) return;
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(1800, audioContext.currentTime + 0.15);
-    
-    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
-    
-    oscillator.type = 'sine';
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.25);
+/* ============================================
+   FLOATING HEARTS BACKGROUND (SUBTLE)
+   ============================================ */
+.floating-hearts-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
 }
 
-// Mute toggle functionality
-const muteToggle = document.getElementById('muteToggle');
-muteToggle.addEventListener('click', () => {
-    isMuted = !isMuted;
-    muteToggle.querySelector('.mute-icon').textContent = isMuted ? '🔇' : '🔊';
-});
-
-// ============================================
-// FLOATING HEARTS BACKGROUND (SUBTLE)
-// ============================================
-
-function createFloatingHearts() {
-    const container = document.getElementById('floatingHeartsBg');
-    const heartEmojis = ['💕', '💖', '💗', '💓', '💘'];
-    
-    setInterval(() => {
-        const heart = document.createElement('div');
-        heart.className = 'floating-heart';
-        heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-        heart.style.left = Math.random() * 100 + '%';
-        heart.style.animationDuration = (Math.random() * 6 + 10) + 's';
-        heart.style.animationDelay = Math.random() * 3 + 's';
-        
-        container.appendChild(heart);
-        
-        setTimeout(() => heart.remove(), 15000);
-    }, 1200);
+.floating-heart {
+    position: absolute;
+    font-size: 18px;
+    opacity: 0.12;
+    animation: floatUpSmooth 12s ease-in-out infinite;
 }
 
-// ============================================
-// SPARKLE PARTICLES (MINIMAL)
-// ============================================
-
-function createSparkleParticles() {
-    const container = document.getElementById('sparkleParticles');
-    
-    setInterval(() => {
-        if (Math.random() > 0.6) { // 40% chance
-            const sparkle = document.createElement('div');
-            sparkle.className = 'sparkle';
-            sparkle.style.left = Math.random() * 100 + '%';
-            sparkle.style.top = Math.random() * 100 + '%';
-            sparkle.style.animationDelay = Math.random() * 2 + 's';
-            
-            container.appendChild(sparkle);
-            
-            setTimeout(() => sparkle.remove(), 5000);
-        }
-    }, 800);
-}
-
-// ============================================
-// BUTTON LOGIC - YES BUTTON
-// ============================================
-
-const yesBtn = document.getElementById('yesBtn');
-const noBtn = document.getElementById('noBtn');
-const responseMessage = document.getElementById('responseMessage');
-const confettiContainer = document.getElementById('confettiContainer');
-
-// YES button hover - sparkle chime
-yesBtn.addEventListener('mouseenter', () => {
-    initAudio();
-    playSparkleChime();
-});
-
-// YES button click
-yesBtn.addEventListener('click', () => {
-    initAudio();
-    playClickSound();
-    
-    // Brighten background gradient slightly
-    document.body.style.background = 'linear-gradient(135deg, #ff6bb5 0%, #ff2d95 50%, #ff6bb5 100%)';
-    document.body.style.backgroundSize = '400% 400%';
-    document.body.style.animation = 'gradientShift 12s ease-in-out infinite';
-    
-    // Show response message
-    responseMessage.textContent = 'okay wait… that was actually elite 🥹💘';
-    responseMessage.classList.add('show', 'glow-pulse');
-    
-    // Hide buttons with smooth fade
-    yesBtn.style.opacity = '0';
-    noBtn.style.opacity = '0';
-    setTimeout(() => {
-        yesBtn.style.display = 'none';
-        noBtn.style.display = 'none';
-    }, 300);
-    
-    // Create subtle heart confetti
-    createHeartConfetti();
-    
-    // Increase floating hearts slightly
-    increaseFloatingHearts();
-    
-    // Show mute toggle
-    setTimeout(() => {
-        muteToggle.style.display = 'flex';
-    }, 500);
-});
-
-// ============================================
-// BUTTON LOGIC - NO BUTTON
-// ============================================
-
-noBtn.addEventListener('click', () => {
-    initAudio();
-    playClickSound();
-    
-    noClickCount++;
-    
-    if (noClickCount === 1) {
-        // First NO click
-        responseMessage.textContent = 'be serious rn 😭 think about it again';
-        responseMessage.classList.add('show');
-        
-        // Grow YES button, shrink NO button (smooth)
-        yesBtn.style.transform = 'scale(1.15)';
-        noBtn.style.transform = 'scale(0.9)';
-        
-        // Small shake animation
-        noBtn.classList.add('shake-animation');
-        setTimeout(() => noBtn.classList.remove('shake-animation'), 400);
-        
-    } else if (noClickCount >= 2) {
-        // Second NO click
-        responseMessage.textContent = 'wow. bold.';
-        
-        // Dim background slightly
-        document.body.style.background = 'linear-gradient(135deg, #d92479 0%, #cc0036 50%, #d92479 100%)';
-        document.body.style.backgroundSize = '400% 400%';
-        
-        // Make YES button glow stronger
-        yesBtn.style.transform = 'scale(1.3)';
-        yesBtn.style.boxShadow = '0 0 50px rgba(255, 45, 149, 0.9), 0 8px 32px rgba(0, 0, 0, 0.4)';
-        
-        // Shrink NO button more
-        noBtn.style.transform = 'scale(0.75)';
-        
-        // Shake animation
-        noBtn.classList.add('shake-animation');
-        setTimeout(() => noBtn.classList.remove('shake-animation'), 400);
-        
-        // Small falling crying emoji animation
-        createCryingEmoji();
+@keyframes floatUpSmooth {
+    0% {
+        transform: translateY(100vh) rotate(0deg) scale(0.8);
+        opacity: 0;
     }
-});
-
-// ============================================
-// HEART CONFETTI ANIMATION (SUBTLE)
-// ============================================
-
-function createHeartConfetti() {
-    const heartEmojis = ['💕', '💖', '💗', '💓', '💘'];
-    
-    // Create 25 hearts (moderate amount)
-    for (let i = 0; i < 25; i++) {
-        setTimeout(() => {
-            const heart = document.createElement('div');
-            heart.className = 'confetti-heart';
-            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-            heart.style.left = Math.random() * 100 + '%';
-            heart.style.animationDelay = Math.random() * 0.4 + 's';
-            heart.style.animationDuration = (Math.random() * 1.5 + 3) + 's';
-            
-            confettiContainer.appendChild(heart);
-            
-            setTimeout(() => heart.remove(), 5000);
-        }, i * 60);
+    10% {
+        opacity: 0.12;
+    }
+    90% {
+        opacity: 0.12;
+    }
+    100% {
+        transform: translateY(-100px) rotate(180deg) scale(1);
+        opacity: 0;
     }
 }
 
-// Increase floating hearts slightly after YES
-function increaseFloatingHearts() {
-    const container = document.getElementById('floatingHeartsBg');
-    const heartEmojis = ['💕', '💖', '💗', '💓', '💘'];
-    
-    const interval = setInterval(() => {
-        for (let i = 0; i < 2; i++) {
-            const heart = document.createElement('div');
-            heart.className = 'floating-heart';
-            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-            heart.style.left = Math.random() * 100 + '%';
-            heart.style.animationDuration = (Math.random() * 5 + 8) + 's';
-            heart.style.opacity = '0.2';
-            
-            container.appendChild(heart);
-            
-            setTimeout(() => heart.remove(), 13000);
-        }
-    }, 600);
+/* ============================================
+   SPARKLE PARTICLES (MINIMAL)
+   ============================================ */
+.sparkle-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
 }
 
-// ============================================
-// CRYING EMOJI ANIMATION (MINIMAL)
-// ============================================
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkleFloat 4s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
 
-function createCryingEmoji() {
-    for (let i = 0; i < 3; i++) {
-        setTimeout(() => {
-            const emoji = document.createElement('div');
-            emoji.className = 'crying-emoji';
-            emoji.textContent = '😭';
-            emoji.style.left = (Math.random() * 60 + 20) + '%';
-            emoji.style.top = '25%';
-            
-            confettiContainer.appendChild(emoji);
-            
-            setTimeout(() => emoji.remove(), 2500);
-        }, i * 300);
+@keyframes sparkleFloat {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(0) scale(0);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translateY(-60px) scale(1);
     }
 }
 
-// ============================================
-// INITIALIZE ON PAGE LOAD
-// ============================================
+/* ============================================
+   MUTE TOGGLE
+   ============================================ */
+.mute-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease-in-out;
+    font-size: 18px;
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    createFloatingHearts();
-    createSparkleParticles();
-    console.log('Valentine\'s website loaded 💕');
-});
+.mute-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    padding: 40px 20px;
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    opacity: 0;
+    animation: fadeInSmooth 1.2s ease-out 0.3s forwards;
+}
+
+@keyframes fadeInSmooth {
+    to {
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   TYPOGRAPHY - Y2K GLOSSY BUBBLE STYLE
+   ============================================ */
+.main-heading {
+    font-size: clamp(3.5rem, 12vw, 7rem);
+    font-weight: 900;
+    margin-bottom: 30px;
+    color: white;
+    text-shadow: 
+        0 0 30px rgba(255, 255, 255, 0.6),
+        0 0 60px rgba(255, 182, 217, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    animation: shimmerGlow 4s ease-in-out infinite;
+    position: relative;
+}
+
+/* Shimmer animation */
+@keyframes shimmerGlow {
+    0%, 100% {
+        text-shadow: 
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 60px rgba(255, 182, 217, 0.4),
+            0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        text-shadow: 
+            0 0 40px rgba(255, 255, 255, 0.9),
+            0 0 80px rgba(255, 182, 217, 0.6),
+            0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.question {
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    margin-bottom: 50px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    animation: fadeInSmooth 1s ease-out 1.3s forwards;
+}
+
+/* ============================================
+   GLASSMORPHISM BUTTONS - CHROME STYLE
+   ============================================ */
+.button-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeInSmooth 1s ease-out 1.6s forwards;
+}
+
+.btn {
+    position: relative;
+    padding: 18px 45px;
+    font-size: clamp(1.1rem, 3vw, 1.35rem);
+    font-weight: 700;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50px;
+    cursor: pointer;
+    overflow: hidden;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.25s ease-in-out;
+}
+
+/* Glossy overlay effect */
+.btn-gloss {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.btn-content {
+    position: relative;
+    z-index: 1;
+}
+
+.btn:hover {
+    transform: scale(1.08);
+    box-shadow: 
+        0 0 30px rgba(255, 45, 149, 0.6),
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.btn:active {
+    transform: scale(1.02);
+}
+
+/* Sparkle burst on hover */
+.btn::after {
+    content: '✨';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn:hover::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    animation: sparkleBurst 0.6s ease-out forwards;
+}
+
+@keyframes sparkleBurst {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Button-specific styles */
+.btn-yes {
+    background: linear-gradient(135deg, rgba(255, 45, 149, 0.3), rgba(255, 107, 181, 0.3));
+}
+
+.btn-no {
+    background: linear-gradient(135deg, rgba(255, 0, 60, 0.3), rgba(255, 77, 109, 0.3));
+}
+
+/* Smooth shake animation for NO button */
+@keyframes smoothShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+.shake-animation {
+    animation: smoothShake 0.4s ease-in-out;
+}
+
+/* ============================================
+   RESPONSE MESSAGE
+   ============================================ */
+.response-message {
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    font-weight: 700;
+    margin-top: 40px;
+    color: white;
+    text-shadow: 
+        0 0 25px rgba(255, 255, 255, 0.7),
+        0 4px 12px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.5s ease-in-out;
+}
+
+.response-message.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Glow pulse animation */
+.glow-pulse {
+    animation: glowPulseEffect 2s ease-in-out infinite;
+}
+
+@keyframes glowPulseEffect {
+    0%, 100% {
+        text-shadow: 
+            0 0 25px rgba(255, 255, 255, 0.7),
+            0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    50% {
+        text-shadow: 
+            0 0 40px rgba(255, 255, 255, 0.9),
+            0 0 60px rgba(255, 182, 217, 0.6),
+            0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* ============================================
+   HEART CONFETTI (SUBTLE)
+   ============================================ */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.confetti-heart {
+    position: absolute;
+    font-size: 26px;
+    opacity: 0.8;
+    animation: confettiFallSmooth 3.5s ease-out forwards;
+}
+
+@keyframes confettiFallSmooth {
+    0% {
+        transform: translateY(-80px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Crying emoji animation */
+.crying-emoji {
+    position: absolute;
+    font-size: 35px;
+    opacity: 0.9;
+    animation: cryFallSmooth 2.5s ease-out forwards;
+}
+
+@keyframes cryFallSmooth {
+    0% {
+        transform: translateY(-40px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(180px);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   FINAL SECTION
+   ============================================ */
+.final-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff003c 0%, #8b0000 100%);
+    position: relative;
+    z-index: 10;
+    padding: 60px 20px;
+}
+
+.final-text {
+    font-size: clamp(4.5rem, 15vw, 9rem);
+    font-weight: 900;
+    text-align: center;
+    display: flex;
+    gap: clamp(8px, 2vw, 15px);
+    flex-wrap: wrap;
+    justify-content: center;
+    color: white;
+}
+
+.final-text .letter {
+    display: inline-block;
+    text-shadow: 
+        0 0 40px rgba(255, 255, 255, 0.8),
+        0 0 80px rgba(255, 45, 149, 0.7),
+        0 6px 20px rgba(0, 0, 0, 0.5);
+    animation: 
+        letterStretchSmooth 2.5s ease-in-out infinite,
+        letterWobbleSmooth 3.5s ease-in-out infinite,
+        pulseSmooth 1.8s ease-in-out infinite;
+    position: relative;
+}
+
+/* Sparkle sweep animation */
+.final-text .letter::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+    animation: sparkleSweep 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes sparkleSweep {
+    0%, 100% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(100%);
+    }
+}
+
+/* Stagger animation delays */
+.final-text .letter:nth-child(1) { animation-delay: 0s; }
+.final-text .letter:nth-child(2) { animation-delay: 0.15s; }
+.final-text .letter:nth-child(3) { animation-delay: 0.3s; }
+.final-text .letter:nth-child(4) { animation-delay: 0.45s; }
+.final-text .letter:nth-child(5) { animation-delay: 0.6s; }
+.final-text .letter:nth-child(6) { animation-delay: 0.75s; }
+.final-text .letter:nth-child(7) { animation-delay: 0.9s; }
+
+@keyframes letterStretchSmooth {
+    0%, 100% {
+        transform: scaleX(1) scaleY(1);
+    }
+    50% {
+        transform: scaleX(1.15) scaleY(0.85);
+    }
+}
+
+@keyframes letterWobbleSmooth {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-3deg);
+    }
+    75% {
+        transform: rotate(3deg);
+    }
+}
+
+@keyframes pulseSmooth {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN (MOBILE-FIRST)
+   ============================================ */
+@media (max-width: 768px) {
+    .button-container {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .mute-toggle {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .final-text {
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 30px 15px;
+    }
+    
+    .question {
+        margin-bottom: 35px;
+    }
+    
+    .btn {
+        padding: 15px 35px;
+    }
+}
+
+/* ============================================
+   SMOOTH TRANSITIONS & PERFORMANCE
+   ============================================ */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hardware acceleration for smooth animations */
+.btn,
+.main-heading,
+.response-message,
+.final-text .letter {
+    will-change: transform;
+}
