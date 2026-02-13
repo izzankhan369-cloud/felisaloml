@@ -7,13 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Floating hearts background effect -->
-    <div class="floating-hearts-container" id="floatingHearts"></div>
+    <!-- Floating hearts background (subtle) -->
+    <div class="floating-hearts-bg" id="floatingHeartsBg"></div>
     
-    <!-- Cursor follower hearts -->
-    <div class="cursor-hearts" id="cursorHearts"></div>
+    <!-- Sparkle particles (minimal) -->
+    <div class="sparkle-particles" id="sparkleParticles"></div>
 
-    <!-- Mute toggle button (hidden initially, shown after first YES click) -->
+    <!-- Optional mute toggle -->
     <button class="mute-toggle" id="muteToggle" style="display: none;">
         <span class="mute-icon">🔊</span>
     </button>
@@ -22,40 +22,30 @@
     <section class="hero-section" id="heroSection">
         <div class="hero-content">
             <h1 class="main-heading">Felisa 💕</h1>
-            <p class="question">So… will you be my Valentine?</p>
+            <p class="question" id="question">So… will you be my Valentine?</p>
             
             <div class="button-container" id="buttonContainer">
                 <button class="btn btn-yes" id="yesBtn">
-                    <span>💗 yes obviously</span>
+                    <span class="btn-content">💗 yes obviously</span>
+                    <div class="btn-gloss"></div>
                 </button>
                 <button class="btn btn-no" id="noBtn">
-                    <span>💔 no</span>
+                    <span class="btn-content">💔 no</span>
+                    <div class="btn-gloss"></div>
                 </button>
             </div>
 
-            <!-- Response message (hidden initially) -->
+            <!-- Response message -->
             <div class="response-message" id="responseMessage"></div>
         </div>
 
-        <!-- Heart confetti (hidden initially) -->
+        <!-- Heart confetti container -->
         <div class="confetti-container" id="confettiContainer"></div>
     </section>
 
-    <!-- IMAGE SECTION -->
-    <section class="image-section" id="imageSection">
-        <h2 class="section-heading">main character origin story</h2>
-        
-        <div class="image-wrapper">
-            <img src="childhood.jpg" alt="Childhood graduation photo" class="childhood-image" id="childhoodImage">
-            <div class="image-glow"></div>
-        </div>
-        
-        <p class="image-caption">from little graduate to someone who found you</p>
-    </section>
-
     <!-- FINAL SECTION -->
-    <section class="final-section">
-        <div class="final-text" id="finalText">
+    <section class="final-section" id="finalSection">
+        <div class="final-text">
             <span class="letter">f</span>
             <span class="letter">a</span>
             <span class="letter">a</span>
@@ -65,12 +55,6 @@
             <span class="letter">h</span>
         </div>
     </section>
-
-    <!-- Image modal (for full-screen view) -->
-    <div class="modal" id="imageModal">
-        <span class="modal-close" id="modalClose">&times;</span>
-        <img class="modal-content" id="modalImage" src="childhood.jpg" alt="Childhood graduation photo">
-    </div>
 
     <script src="script.js"></script>
 </body>
