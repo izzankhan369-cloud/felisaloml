@@ -1,374 +1,583 @@
-// ============================================
-// AUDIO CONTEXT & SOUND MANAGEMENT
-// ============================================
+/* ============================================
+   RESET & BASE
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-let audioContext = null;
-let isMuted = false;
-let audioInitialized = false;
-let ambientMusic = null;
-let noClickCount = 0;
+html {
+    scroll-behavior: smooth;
+}
 
-// Initialize audio context on first user interaction
-function initAudio() {
-    if (!audioInitialized) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        audioInitialized = true;
-        console.log('Audio context initialized');
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Emoji', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    background: linear-gradient(135deg, #ff2d95 0%, #ff003c 50%, #ff2d95 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease-in-out infinite;
+}
+
+/* Animated gradient background */
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
     }
 }
 
-// Create oscillator-based sounds (lightweight, no external files needed)
-function playSparkleChime() {
-    if (!audioContext || isMuted) return;
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Soft, airy sparkle sound
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(1600, audioContext.currentTime + 0.1);
-    
-    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime); // Low volume (20%)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-    
-    oscillator.type = 'sine';
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
+/* Soft blur overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.15) 100%);
+    backdrop-filter: blur(1px);
+    pointer-events: none;
+    z-index: 1;
 }
 
-function playPopSound() {
-    if (!audioContext || isMuted) return;
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Soft pop sound
-    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
-    
-    gainNode.gain.setValueAtTime(0.25, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-    
-    oscillator.type = 'sine';
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.15);
+/* ============================================
+   FLOATING HEARTS BACKGROUND (SUBTLE)
+   ============================================ */
+.floating-hearts-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
 }
 
-function playSadViolin() {
-    if (!audioContext || isMuted) return;
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Dramatic sad note
-    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(250, audioContext.currentTime + 0.5);
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
-    
-    oscillator.type = 'triangle';
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 1);
+.floating-heart {
+    position: absolute;
+    font-size: 18px;
+    opacity: 0.12;
+    animation: floatUpSmooth 12s ease-in-out infinite;
 }
 
-// Ambient music (soft romantic loop)
-function startAmbientMusic() {
-    if (!audioContext || isMuted || ambientMusic) return;
-    
-    // Create a simple ambient loop with multiple oscillators
-    const osc1 = audioContext.createOscillator();
-    const osc2 = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    osc1.connect(gainNode);
-    osc2.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Soft ambient frequencies
-    osc1.frequency.setValueAtTime(220, audioContext.currentTime); // A3
-    osc2.frequency.setValueAtTime(330, audioContext.currentTime); // E4
-    
-    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime); // Low volume (15%)
-    
-    osc1.type = 'sine';
-    osc2.type = 'sine';
-    
-    osc1.start();
-    osc2.start();
-    
-    ambientMusic = { osc1, osc2, gainNode };
-}
-
-function stopAmbientMusic() {
-    if (ambientMusic) {
-        ambientMusic.osc1.stop();
-        ambientMusic.osc2.stop();
-        ambientMusic = null;
+@keyframes floatUpSmooth {
+    0% {
+        transform: translateY(100vh) rotate(0deg) scale(0.8);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.12;
+    }
+    90% {
+        opacity: 0.12;
+    }
+    100% {
+        transform: translateY(-100px) rotate(180deg) scale(1);
+        opacity: 0;
     }
 }
 
-// Mute toggle functionality
-const muteToggle = document.getElementById('muteToggle');
-muteToggle.addEventListener('click', () => {
-    isMuted = !isMuted;
-    muteToggle.querySelector('.mute-icon').textContent = isMuted ? '🔇' : '🔊';
-    
-    if (isMuted) {
-        stopAmbientMusic();
-    } else if (document.getElementById('responseMessage').classList.contains('show')) {
-        startAmbientMusic();
-    }
-});
-
-// ============================================
-// FLOATING HEARTS BACKGROUND
-// ============================================
-
-function createFloatingHearts() {
-    const container = document.getElementById('floatingHearts');
-    const heartEmojis = ['💕', '💖', '💗', '💓', '💘'];
-    
-    setInterval(() => {
-        const heart = document.createElement('div');
-        heart.className = 'floating-heart';
-        heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-        heart.style.left = Math.random() * 100 + '%';
-        heart.style.animationDuration = (Math.random() * 4 + 6) + 's';
-        heart.style.animationDelay = Math.random() * 2 + 's';
-        
-        container.appendChild(heart);
-        
-        // Remove heart after animation
-        setTimeout(() => heart.remove(), 10000);
-    }, 500);
+/* ============================================
+   SPARKLE PARTICLES (MINIMAL)
+   ============================================ */
+.sparkle-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
 }
 
-// ============================================
-// CURSOR FOLLOWER HEARTS
-// ============================================
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkleFloat 4s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
 
-let cursorHeartTimeout;
-
-document.addEventListener('mousemove', (e) => {
-    clearTimeout(cursorHeartTimeout);
-    
-    cursorHeartTimeout = setTimeout(() => {
-        if (Math.random() > 0.8) { // 20% chance
-            const heart = document.createElement('div');
-            heart.className = 'cursor-heart';
-            heart.textContent = '💕';
-            heart.style.left = e.clientX + 'px';
-            heart.style.top = e.clientY + 'px';
-            heart.style.setProperty('--tx', (Math.random() - 0.5) * 100 + 'px');
-            heart.style.setProperty('--ty', -50 + (Math.random() - 0.5) * 50 + 'px');
-            
-            document.getElementById('cursorHearts').appendChild(heart);
-            
-            setTimeout(() => heart.remove(), 1000);
-        }
-    }, 100);
-});
-
-// ============================================
-// BUTTON LOGIC - YES BUTTON
-// ============================================
-
-const yesBtn = document.getElementById('yesBtn');
-const noBtn = document.getElementById('noBtn');
-const responseMessage = document.getElementById('responseMessage');
-const heroSection = document.getElementById('heroSection');
-const confettiContainer = document.getElementById('confettiContainer');
-
-// YES button hover - play sparkle chime
-yesBtn.addEventListener('mouseenter', () => {
-    initAudio();
-    playSparkleChime();
-});
-
-// YES button click
-yesBtn.addEventListener('click', () => {
-    initAudio();
-    playPopSound();
-    
-    // Change background to brighter pink gradient
-    document.body.style.background = 'linear-gradient(135deg, #ff6bb5 0%, #ff2d95 50%, #ff6bb5 100%)';
-    
-    // Show response message
-    responseMessage.textContent = 'STOP that was actually elite energy 🥹💘';
-    responseMessage.classList.add('show');
-    
-    // Hide buttons
-    yesBtn.style.display = 'none';
-    noBtn.style.display = 'none';
-    
-    // Create heart confetti
-    createHeartConfetti();
-    
-    // Start ambient music
-    setTimeout(() => {
-        startAmbientMusic();
-        muteToggle.style.display = 'flex'; // Show mute toggle
-    }, 500);
-    
-    // Increase floating hearts
-    increaseFloatingHearts();
-});
-
-// ============================================
-// BUTTON LOGIC - NO BUTTON
-// ============================================
-
-// NO button click
-noBtn.addEventListener('click', () => {
-    initAudio();
-    playPopSound();
-    
-    noClickCount++;
-    
-    if (noClickCount === 1) {
-        // First NO click
-        responseMessage.textContent = 'be serious rn 😭 think about it again';
-        responseMessage.classList.add('show');
-        
-        // Grow YES button, shrink NO button
-        yesBtn.style.transform = 'scale(1.15)';
-        noBtn.style.transform = 'scale(0.9)';
-        
-    } else if (noClickCount >= 2) {
-        // Second NO click
-        responseMessage.textContent = '💔😭 wow okay';
-        
-        // Play sad violin
-        playSadViolin();
-        
-        // Shake NO button
-        noBtn.classList.add('shake-animation');
-        setTimeout(() => noBtn.classList.remove('shake-animation'), 500);
-        
-        // Make YES button even larger and more glowing
-        yesBtn.style.transform = 'scale(1.3)';
-        yesBtn.style.boxShadow = '0 0 50px rgba(255, 45, 149, 1), 0 8px 20px rgba(0, 0, 0, 0.4)';
-        
-        // Shrink NO button more
-        noBtn.style.transform = 'scale(0.75)';
-        
-        // Create crying emoji animation
-        createCryingEmoji();
+@keyframes sparkleFloat {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(0) scale(0);
     }
-});
-
-// ============================================
-// HEART CONFETTI ANIMATION
-// ============================================
-
-function createHeartConfetti() {
-    const heartEmojis = ['💕', '💖', '💗', '💓', '💘', '❤️'];
-    
-    for (let i = 0; i < 50; i++) {
-        setTimeout(() => {
-            const heart = document.createElement('div');
-            heart.className = 'confetti-heart';
-            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-            heart.style.left = Math.random() * 100 + '%';
-            heart.style.animationDelay = Math.random() * 0.5 + 's';
-            heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            
-            confettiContainer.appendChild(heart);
-            
-            setTimeout(() => heart.remove(), 5000);
-        }, i * 50);
+    50% {
+        opacity: 0.6;
+        transform: translateY(-60px) scale(1);
     }
 }
 
-// Increase floating hearts after YES click
-function increaseFloatingHearts() {
-    const container = document.getElementById('floatingHearts');
-    const heartEmojis = ['💕', '💖', '💗', '💓', '💘'];
+/* ============================================
+   MUTE TOGGLE
+   ============================================ */
+.mute-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease-in-out;
+    font-size: 18px;
+}
+
+.mute-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    padding: 40px 20px;
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    opacity: 0;
+    animation: fadeInSmooth 1.2s ease-out 0.3s forwards;
+}
+
+@keyframes fadeInSmooth {
+    to {
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   TYPOGRAPHY - Y2K GLOSSY BUBBLE STYLE
+   ============================================ */
+.main-heading {
+    font-size: clamp(3.5rem, 12vw, 7rem);
+    font-weight: 900;
+    margin-bottom: 30px;
+    color: white;
+    text-shadow: 
+        0 0 30px rgba(255, 255, 255, 0.6),
+        0 0 60px rgba(255, 182, 217, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    animation: shimmerGlow 4s ease-in-out infinite;
+    position: relative;
+}
+
+/* Shimmer animation */
+@keyframes shimmerGlow {
+    0%, 100% {
+        text-shadow: 
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 60px rgba(255, 182, 217, 0.4),
+            0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        text-shadow: 
+            0 0 40px rgba(255, 255, 255, 0.9),
+            0 0 80px rgba(255, 182, 217, 0.6),
+            0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.question {
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    margin-bottom: 50px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    animation: fadeInSmooth 1s ease-out 1.3s forwards;
+}
+
+/* ============================================
+   GLASSMORPHISM BUTTONS - CHROME STYLE
+   ============================================ */
+.button-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeInSmooth 1s ease-out 1.6s forwards;
+}
+
+.btn {
+    position: relative;
+    padding: 18px 45px;
+    font-size: clamp(1.1rem, 3vw, 1.35rem);
+    font-weight: 700;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50px;
+    cursor: pointer;
+    overflow: hidden;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.25s ease-in-out;
+}
+
+/* Glossy overlay effect */
+.btn-gloss {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.btn-content {
+    position: relative;
+    z-index: 1;
+}
+
+.btn:hover {
+    transform: scale(1.08);
+    box-shadow: 
+        0 0 30px rgba(255, 45, 149, 0.6),
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.btn:active {
+    transform: scale(1.02);
+}
+
+/* Sparkle burst on hover */
+.btn::after {
+    content: '✨';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn:hover::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    animation: sparkleBurst 0.6s ease-out forwards;
+}
+
+@keyframes sparkleBurst {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Button-specific styles */
+.btn-yes {
+    background: linear-gradient(135deg, rgba(255, 45, 149, 0.3), rgba(255, 107, 181, 0.3));
+}
+
+.btn-no {
+    background: linear-gradient(135deg, rgba(255, 0, 60, 0.3), rgba(255, 77, 109, 0.3));
+}
+
+/* Smooth shake animation for NO button */
+@keyframes smoothShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+.shake-animation {
+    animation: smoothShake 0.4s ease-in-out;
+}
+
+/* ============================================
+   RESPONSE MESSAGE
+   ============================================ */
+.response-message {
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    font-weight: 700;
+    margin-top: 40px;
+    color: white;
+    text-shadow: 
+        0 0 25px rgba(255, 255, 255, 0.7),
+        0 4px 12px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.5s ease-in-out;
+}
+
+.response-message.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Glow pulse animation */
+.glow-pulse {
+    animation: glowPulseEffect 2s ease-in-out infinite;
+}
+
+@keyframes glowPulseEffect {
+    0%, 100% {
+        text-shadow: 
+            0 0 25px rgba(255, 255, 255, 0.7),
+            0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    50% {
+        text-shadow: 
+            0 0 40px rgba(255, 255, 255, 0.9),
+            0 0 60px rgba(255, 182, 217, 0.6),
+            0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* ============================================
+   HEART CONFETTI (SUBTLE)
+   ============================================ */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.confetti-heart {
+    position: absolute;
+    font-size: 26px;
+    opacity: 0.8;
+    animation: confettiFallSmooth 3.5s ease-out forwards;
+}
+
+@keyframes confettiFallSmooth {
+    0% {
+        transform: translateY(-80px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Crying emoji animation */
+.crying-emoji {
+    position: absolute;
+    font-size: 35px;
+    opacity: 0.9;
+    animation: cryFallSmooth 2.5s ease-out forwards;
+}
+
+@keyframes cryFallSmooth {
+    0% {
+        transform: translateY(-40px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(180px);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   FINAL SECTION
+   ============================================ */
+.final-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff003c 0%, #8b0000 100%);
+    position: relative;
+    z-index: 10;
+    padding: 60px 20px;
+}
+
+.final-text {
+    font-size: clamp(4.5rem, 15vw, 9rem);
+    font-weight: 900;
+    text-align: center;
+    display: flex;
+    gap: clamp(8px, 2vw, 15px);
+    flex-wrap: wrap;
+    justify-content: center;
+    color: white;
+}
+
+.final-text .letter {
+    display: inline-block;
+    text-shadow: 
+        0 0 40px rgba(255, 255, 255, 0.8),
+        0 0 80px rgba(255, 45, 149, 0.7),
+        0 6px 20px rgba(0, 0, 0, 0.5);
+    animation: 
+        letterStretchSmooth 2.5s ease-in-out infinite,
+        letterWobbleSmooth 3.5s ease-in-out infinite,
+        pulseSmooth 1.8s ease-in-out infinite;
+    position: relative;
+}
+
+/* Sparkle sweep animation */
+.final-text .letter::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+    animation: sparkleSweep 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes sparkleSweep {
+    0%, 100% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(100%);
+    }
+}
+
+/* Stagger animation delays */
+.final-text .letter:nth-child(1) { animation-delay: 0s; }
+.final-text .letter:nth-child(2) { animation-delay: 0.15s; }
+.final-text .letter:nth-child(3) { animation-delay: 0.3s; }
+.final-text .letter:nth-child(4) { animation-delay: 0.45s; }
+.final-text .letter:nth-child(5) { animation-delay: 0.6s; }
+.final-text .letter:nth-child(6) { animation-delay: 0.75s; }
+.final-text .letter:nth-child(7) { animation-delay: 0.9s; }
+
+@keyframes letterStretchSmooth {
+    0%, 100% {
+        transform: scaleX(1) scaleY(1);
+    }
+    50% {
+        transform: scaleX(1.15) scaleY(0.85);
+    }
+}
+
+@keyframes letterWobbleSmooth {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-3deg);
+    }
+    75% {
+        transform: rotate(3deg);
+    }
+}
+
+@keyframes pulseSmooth {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN (MOBILE-FIRST)
+   ============================================ */
+@media (max-width: 768px) {
+    .button-container {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
     
-    // Create more hearts faster
-    const interval = setInterval(() => {
-        for (let i = 0; i < 3; i++) {
-            const heart = document.createElement('div');
-            heart.className = 'floating-heart';
-            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-            heart.style.left = Math.random() * 100 + '%';
-            heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
-            
-            container.appendChild(heart);
-            
-            setTimeout(() => heart.remove(), 8000);
-        }
-    }, 300);
-}
-
-// ============================================
-// CRYING EMOJI ANIMATION
-// ============================================
-
-function createCryingEmoji() {
-    for (let i = 0; i < 5; i++) {
-        setTimeout(() => {
-            const emoji = document.createElement('div');
-            emoji.className = 'crying-emoji';
-            emoji.textContent = '😭';
-            emoji.style.left = (Math.random() * 80 + 10) + '%';
-            emoji.style.top = '30%';
-            
-            confettiContainer.appendChild(emoji);
-            
-            setTimeout(() => emoji.remove(), 2000);
-        }, i * 200);
+    .btn {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .mute-toggle {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .final-text {
+        gap: 5px;
     }
 }
 
-// ============================================
-// IMAGE MODAL (Full-screen view)
-// ============================================
-
-const childhoodImage = document.getElementById('childhoodImage');
-const imageModal = document.getElementById('imageModal');
-const modalImage = document.getElementById('modalImage');
-const modalClose = document.getElementById('modalClose');
-
-// Open modal on image click
-childhoodImage.addEventListener('click', () => {
-    imageModal.style.display = 'block';
-});
-
-// Close modal on X click
-modalClose.addEventListener('click', () => {
-    imageModal.style.display = 'none';
-});
-
-// Close modal on background click
-imageModal.addEventListener('click', (e) => {
-    if (e.target === imageModal) {
-        imageModal.style.display = 'none';
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 30px 15px;
     }
-});
-
-// Close modal on ESC key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && imageModal.style.display === 'block') {
-        imageModal.style.display = 'none';
+    
+    .question {
+        margin-bottom: 35px;
     }
-});
+    
+    .btn {
+        padding: 15px 35px;
+    }
+}
 
-// ============================================
-// INITIALIZE ON PAGE LOAD
-// ============================================
+/* ============================================
+   SMOOTH TRANSITIONS & PERFORMANCE
+   ============================================ */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    createFloatingHearts();
-    console.log('Valentine\'s Day website loaded! 💕');
-});
+/* Hardware acceleration for smooth animations */
+.btn,
+.main-heading,
+.response-message,
+.final-text .letter {
+    will-change: transform;
+}
