@@ -1,0 +1,665 @@
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #ff2d95 0%, #ff003c 50%, #ff2d95 100%);
+    color: white;
+    overflow-x: hidden;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Dreamcore lens blur effect at edges */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+/* ============================================
+   FLOATING HEARTS BACKGROUND
+   ============================================ */
+.floating-hearts-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.floating-heart {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0.6;
+    animation: floatUp 8s linear infinite;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   CURSOR FOLLOWER HEARTS
+   ============================================ */
+.cursor-hearts {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.cursor-heart {
+    position: absolute;
+    font-size: 12px;
+    opacity: 0;
+    animation: cursorHeartFloat 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes cursorHeartFloat {
+    0% {
+        transform: translate(0, 0) scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(1);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   MUTE TOGGLE BUTTON
+   ============================================ */
+.mute-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    font-size: 20px;
+}
+
+.mute-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    padding: 40px 20px;
+    opacity: 0;
+    animation: fadeInPage 1s ease-out 0.3s forwards;
+}
+
+@keyframes fadeInPage {
+    to {
+        opacity: 1;
+    }
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+/* Main heading with bubble/glossy effect */
+.main-heading {
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 900;
+    margin-bottom: 30px;
+    text-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 0 40px rgba(255, 45, 149, 0.6),
+        0 4px 8px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    animation: glowPulse 3s ease-in-out infinite;
+    background: linear-gradient(135deg, #ffffff 0%, #ffb3d9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 20px rgba(255, 255, 255, 0.8),
+            0 0 40px rgba(255, 45, 149, 0.6),
+            0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        text-shadow: 
+            0 0 30px rgba(255, 255, 255, 1),
+            0 0 60px rgba(255, 45, 149, 0.8),
+            0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.question {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    margin-bottom: 50px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.button-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.btn {
+    padding: 20px 50px;
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-transform: lowercase;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Y2K chrome-style glossy effect */
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-yes {
+    background: linear-gradient(135deg, #ff2d95, #ff6bb5);
+    color: white;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.btn-yes:hover {
+    transform: scale(1.1);
+    box-shadow: 
+        0 0 30px rgba(255, 45, 149, 0.8),
+        0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-no {
+    background: linear-gradient(135deg, #ff003c, #ff4d6d);
+    color: white;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.btn-no:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 0 20px rgba(255, 0, 60, 0.6),
+        0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* NO button shake animation (applied via JS on second click) */
+@keyframes shake {
+    0%, 100% { transform: translateX(0) scale(1); }
+    25% { transform: translateX(-10px) scale(1); }
+    75% { transform: translateX(10px) scale(1); }
+}
+
+.shake-animation {
+    animation: shake 0.5s ease;
+}
+
+/* ============================================
+   RESPONSE MESSAGE
+   ============================================ */
+.response-message {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    margin-top: 40px;
+    text-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 4px 10px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.5s ease;
+}
+
+.response-message.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ============================================
+   HEART CONFETTI
+   ============================================ */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.confetti-heart {
+    position: absolute;
+    font-size: 30px;
+    animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Crying emoji animation (for second NO click) */
+.crying-emoji {
+    position: absolute;
+    font-size: 40px;
+    animation: cryFall 2s ease-out forwards;
+}
+
+@keyframes cryFall {
+    0% {
+        transform: translateY(-50px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(200px);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   IMAGE SECTION
+   ============================================ */
+.image-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.section-heading {
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 60px;
+    text-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 0 40px rgba(255, 45, 149, 0.6);
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.image-wrapper {
+    position: relative;
+    max-width: 500px;
+    width: 100%;
+    margin-bottom: 30px;
+    cursor: pointer;
+    animation: floatImage 4s ease-in-out infinite;
+}
+
+@keyframes floatImage {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.childhood-image {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+    border: 5px solid #ff2d95;
+    box-shadow: 
+        0 0 40px rgba(255, 45, 149, 0.8),
+        0 10px 30px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.childhood-image:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 0 60px rgba(255, 45, 149, 1),
+        0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Dream glow behind image */
+.image-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255, 45, 149, 0.6) 0%, transparent 70%);
+    filter: blur(40px);
+    z-index: 1;
+    animation: glowPulseImage 3s ease-in-out infinite;
+}
+
+@keyframes glowPulseImage {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Sparkle animation overlay */
+.image-wrapper::after {
+    content: '✨';
+    position: absolute;
+    font-size: 30px;
+    animation: sparkleMove 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes sparkleMove {
+    0% {
+        top: 10%;
+        left: 10%;
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    50% {
+        top: 15%;
+        left: 85%;
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        top: 85%;
+        left: 15%;
+        opacity: 0;
+    }
+}
+
+.image-caption {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    font-style: italic;
+    text-align: center;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    max-width: 500px;
+}
+
+/* ============================================
+   IMAGE MODAL (Full-screen view)
+   ============================================ */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 15px;
+    box-shadow: 0 0 50px rgba(255, 45, 149, 0.8);
+}
+
+.modal-close {
+    position: absolute;
+    top: 30px;
+    right: 50px;
+    color: white;
+    font-size: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2001;
+}
+
+.modal-close:hover {
+    color: #ff2d95;
+    transform: scale(1.2);
+}
+
+/* ============================================
+   FINAL SECTION
+   ============================================ */
+.final-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff003c 0%, #8b0000 100%);
+    position: relative;
+    z-index: 10;
+    padding: 40px 20px;
+}
+
+.final-text {
+    font-size: clamp(4rem, 12vw, 8rem);
+    font-weight: 900;
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.final-text .letter {
+    display: inline-block;
+    animation: 
+        letterStretch 2s ease-in-out infinite,
+        letterWobble 3s ease-in-out infinite,
+        heartbeatPulse 1.5s ease-in-out infinite;
+    text-shadow: 
+        0 0 30px rgba(255, 255, 255, 0.9),
+        0 0 60px rgba(255, 45, 149, 0.8),
+        0 5px 15px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, #ffffff 0%, #ff2d95 50%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 200%;
+    animation: 
+        letterStretch 2s ease-in-out infinite,
+        letterWobble 3s ease-in-out infinite,
+        heartbeatPulse 1.5s ease-in-out infinite,
+        glitterShimmer 3s linear infinite;
+}
+
+/* Stagger animation delays for each letter */
+.final-text .letter:nth-child(1) { animation-delay: 0s; }
+.final-text .letter:nth-child(2) { animation-delay: 0.1s; }
+.final-text .letter:nth-child(3) { animation-delay: 0.2s; }
+.final-text .letter:nth-child(4) { animation-delay: 0.3s; }
+.final-text .letter:nth-child(5) { animation-delay: 0.4s; }
+.final-text .letter:nth-child(6) { animation-delay: 0.5s; }
+.final-text .letter:nth-child(7) { animation-delay: 0.6s; }
+
+@keyframes letterStretch {
+    0%, 100% {
+        transform: scaleX(1) scaleY(1);
+    }
+    50% {
+        transform: scaleX(1.2) scaleY(0.8);
+    }
+}
+
+@keyframes letterWobble {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-5deg);
+    }
+    75% {
+        transform: rotate(5deg);
+    }
+}
+
+@keyframes heartbeatPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes glitterShimmer {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 200% 50%;
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN (MOBILE-FIRST)
+   ============================================ */
+@media (max-width: 768px) {
+    .button-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .mute-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .modal-close {
+        top: 20px;
+        right: 30px;
+        font-size: 40px;
+    }
+    
+    .image-section {
+        padding: 60px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 20px;
+    }
+    
+    .question {
+        margin-bottom: 30px;
+    }
+    
+    .btn {
+        padding: 15px 30px;
+    }
+    
+    .final-text {
+        gap: 5px;
+    }
+  }
